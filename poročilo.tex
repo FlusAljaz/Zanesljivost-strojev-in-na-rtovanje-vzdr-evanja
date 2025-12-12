@@ -1,0 +1,379 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{setspace}
+\onehalfspacing
+
+\title{Optimalna zamenjava stroja v prenovitvenem modelu \\ 
+\large Primerjava Weibull in lognormalnega modela z degradacijo}
+\author{Aljaž Flus}
+\date{December 2025}
+
+\begin{document}
+
+
+
+\section{Uvod}
+
+Zanesljivost strojev in načrtovanje vzdrževanja je področje, ki preučuje naključne okvare strojev, njihove posledice in optimalne strategije popravil in zamenjav. 
+Temeljno vlogo imajo slučajni procesi, ki opisujejo, kako se naključni pojavi zgodijo skozi čas.
+
+\subsection*{Slučajni procesi}
+
+Slučajni proces je družina naključnih spremenljivk $\{X(t)\}_{t\ge 0}$, ki opisuje stanje sistema v času. 
+V zanesljivosti strojev najpogosteje obravnavamo dva tipa procesov:
+
+\begin{itemize}
+    \item \textbf{proces časov med okvarami}: $T_1, T_2, \dots$, kjer je $T_i$ medprihodni časi, ki nam povejo koliko časa je minilo od $i$-tega popravila do $(i+1)$-te okvare,
+    \item \textbf{proces števila okvar}: $N(t)$, število okvar do časa $t$.
+\end{itemize}
+
+Če so časi med okvarami neodvisni in enako porazdeljeni, nastane tako imenovan prenovitveni proces. 
+Tak model omogoča oceno:
+
+\begin{itemize}
+    \item pričakovanega števila okvar v določenem obdobju,
+    \item skupnih stroškov okvar in popravil,
+    \item optimalnega časa za zamenjavo stroja.
+\end{itemize}
+
+Osnovna naloga v tej projektni nalogi je primerjava različnih modelov življenjske dobe in njihov vpliv na optimalno strategijo vzdrževanja.
+
+\section{Modeli življenjske dobe strojev}
+
+V tej nalogi uporabljamo tri pomembne porazdelitve časov med okvarami:
+
+\begin{enumerate}
+    \item eksponentno porazdelitev,
+    \item Weibullovo porazdelitev,
+    \item težkorepo - lognormalno porazdelitev.
+\end{enumerate}
+
+V nadaljevanju bomo opisali zgoraj naštete porazdelitve.
+
+\subsection{Eksponentna porazdelitev}
+
+Eksponentna porazdelitev se pogosto uporablja za modeliranje naključnih okvar brez staranja sistema. Verjetnost okvare je v vsakem trenutku enaka, neodvisno od starosti stroja.
+
+Naj bo slučajna spremenljivka $T$ porazdeljena kot
+\[
+T \sim \mathrm{Exp}(\lambda), \qquad \lambda > 0.
+\]
+
+Porazdelitvena funkcija je
+\[
+F_T(t) =
+\begin{cases}
+1 - e^{-\lambda t}, & t \ge 0, \\
+0, & t < 0.
+\end{cases}
+\]
+
+Gostota verjetnosti je
+\[
+f_T(t) =
+\begin{cases}
+\lambda e^{-\lambda t}, & t \ge 0, \\
+0, & t < 0.
+\end{cases}
+\]
+
+Pričakovana vrednost je
+\[
+\mathbb{E}[T]
+= \int_0^\infty t \lambda e^{-\lambda t} \, dt
+= \frac{1}{\lambda}.
+\]
+
+Hazardna funkcija je konstantna, zato model ne opisuje staranja sistema.
+
+\subsection{Weibullova porazdelitev}
+
+Weibullova porazdelitev omogoča modeliranje staranja stroja. 
+
+Naj bo
+\[
+T \sim \mathrm{Weibull}(\beta, \eta), \qquad \beta > 0, \ \eta > 0.
+\]
+Parameter $\beta >0$ nam pove 
+kako se verjetnost okvare obnaša skozi čas. Če je vrednost parametra večja od 1 nam to pove 
+da verjetnost okvare raste skozi čas. Parameter $\eta >0$ pa nam pove življensko dobo stroja, 
+večji kot je, daljše bo povprečno delovanje našega stroja.
+
+Porazdelitvena funkcija je
+\[
+F_T(t) =
+\begin{cases}
+1 - e^{-(t/\eta)^\beta}, & t \ge 0, \\
+0, & t < 0.
+\end{cases}
+\]
+
+Gostota verjetnosti je
+\[
+f_T(t) =
+\begin{cases}
+\displaystyle
+\frac{\beta}{\eta}
+\left(\frac{t}{\eta}\right)^{\beta-1}
+e^{-(t/\eta)^\beta},
+& t \ge 0, \\
+0, & t < 0.
+\end{cases}
+\]
+
+Pričakovana vrednost je
+\[
+\mathbb{E}[T]
+= \int_0^\infty t f_T(t)\,dt
+= \eta \, \Gamma\!\left(1 + \frac{1}{\beta}\right),
+\]
+
+\subsection{Lognormalna porazdelitev}
+
+Lognormalna porazdelitev spada med težkorepe porazdelitve, katere značilnost je da njihov rep ni eksponentno omejen.
+Poljudno to pomeni da se porazdelitev manjša bolj počasi kot pri eksponentni porazdelitvi. 
+Zanjo so značilni težki repi, kar pomeni možnost zelo dolgih časov delovanja.
+
+Naj bo
+\[
+T \sim \mathrm{Lognormal}(\mu, \sigma^2),
+\qquad \mu \in \mathbb{R}, \ \sigma > 0.
+\]
+
+Porazdelitvena funkcija je
+\[
+F_T(t) =
+\begin{cases}
+\Phi\!\left(\dfrac{\ln t - \mu}{\sigma}\right), & t > 0, \\
+0, & t \le 0,
+\end{cases}
+\]
+kjer je $\Phi(\cdot)$ porazdelitvena funkcija standardne normalne porazdelitve.
+
+Gostota verjetnosti je
+\[
+f_T(t) =
+\begin{cases}
+\displaystyle
+\frac{1}{t \sigma \sqrt{2\pi}}
+\exp\!\left(
+-\frac{(\ln t - \mu)^2}{2\sigma^2}
+\right),
+& t > 0, \\
+0, & t \le 0.
+\end{cases}
+\]
+
+Pričakovana vrednost je
+\[
+\mathbb{E}[T]
+= \int_0^\infty t f_T(t)\,dt
+= e^{\mu + \sigma^2/2}.
+\]
+
+
+
+\newpage
+
+\section{Pričakovano število okvar v času $[0,20]$}
+
+Najprej bomo poiskušali izračunati število okvar analitično oziroma vsaj numerično. Tukaj bomo predpostavili 
+da stroji nimajo degradacije in da takoj ko se stroj pokvari ga popravimo oziroma zamenjamo z novim.
+
+\begin{itemize}
+    \item Eksponentni model ($\lambda = 0.25)$.
+    Tukaj lahko preprosto analitično izračunamo število okvar kot $E[N_T] = \lambda T$, torej je $E[N(20)] = 0.25 * 20 = 5$
+    \item Weibullov model ($\beta = 2, \eta = 4$).
+    Tukaj pa uporabimo znanje o prenovitvenih procesih, kjer velja formula
+    $$
+    E[N_T] = m(T) =F(T) + \int_{0}^{T} m(T - s)f(s) ds,
+    $$
+    kjer je $F$ kumilativna porazdelitvena funkcija naše slučajne spremenljivke, 
+    $f$ pa njena pripadajoča gostota. Ko to izračunamo numerično dobimo $E[N(20)] = 5.2788$
+    \item Lognormalni model $(\mu = ln(4) - \sigma/2, \sigma = 0.5)$.
+    Tukaj je zelo važno kako določimo $\mu$, ker pri tej porazdelitvi $\mu$, kot smo ga navajeni 
+    pri normalni porazdelitvi, ne pove dejansko pričakovano dobo delovanja stroja, ampka moramo ta 
+    $\mu$ iz eksponentne porazdelitve tranformirat da velja $e^{\mu + \sigma / 2} = 4$.
+    Tukaj prav tako uporabimo prenovitveno enačno in dobimo rezultat $E[N(20)] = 4.6424$
+\end{itemize}
+
+Sedaj pa lahko te analitično oziroma numerično izračunane rezultate primerjamo z našimi simulacijami.
+Za simuliranje smo izračunali Monte Carlo simulacije, ki so numerična metoda za približke 
+pričakovane vrednosti. Temelji na generiranju velikega števila realizacij slučajnega procesa in 
+izračunu statističnih povprečij teh simulacij.
+
+Za vsak model smo generirali 10000 simulacij in ocenili $E[N(20)]$ in dobili nasledje približke.
+
+\begin{itemize}
+    \item Eksponentni model ($\lambda=0.25$):
+    \[
+    \mathbb{E}[N(20)] \approx 5.0144.
+    \]
+    
+    \item Weibull ($\beta=2$, $\eta=4$):
+    \[
+    \mathbb{E}[N(20)] \approx 5.2806.
+    \]
+    
+    \item Lognormal ($\mu=ln(4) - \sigma / 2$, $\sigma=0.5$):
+    \[
+    \mathbb{E}[N(20)] \approx 4.6408,
+    \]
+\end{itemize}
+
+Tukaj lahko kot komentar omenimo da opazimo da se simulacije res dobro prilegajo 
+našim numeričnim oziroma analitičnim izračunom, tako da lahko rečemo da lahko z Monte Carlo simulacijami 
+dobimo dober približek da dejanske izračune.
+
+\section{Degradacija življenjske dobe stroja}
+
+Sedaj pa bomo pogledali primer, ko pride do degradacije življenske dobe stroja ko ga popravimo. 
+Predpodstavili bomo da se stroju z vsakim popravilom njegova življenjska doba zmanjša za nek odstotek.
+To pa lahko zapišemo s pomočjo naslednjih enačb.
+\[
+\mathbb{E}[T_i] = m_0 d^{i-1},
+\]
+kjer je $0 < d < 1$ faktor degradacije, $m_0$ pa začetna pričakovana življenjska doba.
+
+Za Weibullov model degradacija parametra skale $\eta$ neposredno povzroči degradacijo pričakovane vrednosti:
+\[
+\eta_i = \eta_0 d^{i-1}.
+\]
+
+Pri lognormalni porazdelitvi pa je potrebna previdnost. 
+Če degradiramo parameter $\mu$, degradiramo median življenjske dobe, ne pa povprečja:
+\[
+\text{median}(T_i) = e^{\mu_i}.
+\]
+Da degradiramo povprečje, moramo uporabiti transformacijo:
+\[
+m_i = m_0 d^{i-1}, \qquad 
+\mu_i = \ln(m_i) - \frac{\sigma^2}{2}.
+\]
+Le v tem primeru se lognormalni model obnaša usklajeno z analitično formulo za $E[T]$.
+
+\section{Pričakovani čas cikla}
+
+Ob predpostavki degradacije pričakovane življenjske dobe dobimo:
+\[
+E[\text{čas cikla do k-te okvare}]
+= \sum_{i=1}^k E[T_i]
+= m_0\sum_{i=0}^{k-1} d^i
+= m_0 \frac{1 - d^k}{1 - d}.
+\]
+Ta formula nam bo omogočala analitično optimizacijo brez simulacij.
+
+\section{Model stroškov in optimizacija}
+
+Naj bo
+\[
+C_n = \text{strošek novega stroja}, \qquad
+C_p = \text{strošek popravila}, \qquad
+C_d = \text{izguba dohodka}.
+\]
+Skupni strošek cikla z $k$ popravili je:
+\[
+C_{\text{cikel}} = C_n + k(C_p + C_d) = C_n + kC,
+\qquad C = C_p + C_d.
+\]
+
+Strošek na enoto časa je
+\[
+g(k) = \frac{C_n + kC}{m_0 \dfrac{1 - d^k}{1 - d}}.
+\]
+Mi hočemo ugotoviti kdaj je ta strošek na časovno enoto najmanjši.
+Ker je $m_0/(1-d)$ konstanta, minimiziramo
+\[
+h(k) = \frac{C_n + kC}{1 - d^k},
+\]
+kjer je iskan optimalni $k \in \mathbb{N}$.
+
+Za realni $k$ odvajamo:
+\[
+h'(k) = 
+\frac{C(1 - d^k) - (C_n + Ck)(-\ln d)\, d^k}{(1 - d^k)^2}.
+\]
+
+Optimalna točka zadošča enačbi
+\[
+C(1 - d^k) + (C_n + Ck)(\ln d)\, d^k = 0.
+\]
+Enačbo rešimo numerično in rezultat zaokrožimo na najbližje celo število.
+
+\section{Optimalno število popravil z našimi parametri}
+
+Uporabili bomo naslednje parametre:
+\[
+C_n = 8000,\quad C_p = 600,\quad C_d = 250,\quad C = 850.
+\]
+
+Življenjske dobe:
+\begin{itemize}
+\item eksponentna: $\lambda = 0.25$
+\item Weibull: $\beta = 2$, $\eta = 4$
+\item lognormal: $\mu = ln(4) - \sigma /2$, $\sigma = 0.5$,
+\end{itemize}
+
+Degradacija: $d = 0.8$.
+
+Za $k = 1,\dots,30$ izračunamo $g(k)$.
+
+Tukaj dobimo analitično rešitev $k^* = 7$kar pomeni, da je optimalno opraviti $7$ popravil, preden stroj zamenjamo z novim. 
+Ta rešitev je enaka za vse obravnavane porazdelitve. 
+Če malo pomislimo je to zelo logična rešitev, saj nam porazdelitev določa zgolj trajanje posameznih ciklov, 
+ne vplivajo pa neposredno na stroške, ki nastanejo znotraj cikla.
+Ker je cilj minimizirati stroške na cikel, odločilno le število okvar, po katerik stroj zamenjamo. 
+Optimalen $k^*$ je odvisen samo od stroškov modela in od njegove  degradacije.
+
+
+\section{Monte Carlo simulacije}
+
+Sedaj pa bomo analitičen izračunan $k^*=7$ preverili še če sovpada z rezultati iz Monte Carlo simulacij. 
+Za vsak model smo generirali 10000 simulacij in ocenili kje dosežemo optimalen $k^*$ in dobili nasledje
+približke:
+
+\begin{itemize}
+    \item Eksponentni model ($\lambda=0.25$):
+    \[
+    k^* = 7.
+    \]
+    
+    \item Weibull ($\beta=2$, $\eta=4$):
+    \[
+    k^* = 7.
+    \]
+    
+    \item Lognormal ($\mu=ln(4) - \sigma / 2$, $\sigma=0.5$):
+    \[
+    k^* = 7,
+    \]
+\end{itemize}
+
+Tudi tukaj vidimo da se vrednosti lepo ujemajo z analitično izračunanimi. Torej lahko rečemo,
+da res lahko s pomočjo Monte Carlo simulacijami ocenimo optimalno stevilo popravil preden stroj zamenjamo.
+
+
+\section{Zaključek}
+
+V tej projektni nalogi smo obravnavali problem optimalnega števila popravil 
+preden zamenjamo stroj v okviru prenovitvenega modela z degradacijo življenjske dobe. 
+Obravnavali smo tri različne porazdelitve časov med okvarami: eksponentni, Weibullov in lognormalni model.
+
+Najprej smo za primer brez degradacije izračunali pričakovano število okvar 
+v fiksnem časovnem intervalu tako analitično kot tudi numerično in te rezultate primerjali
+z rezultati ki smo jih dobili z Monte Carlo simulacijami. 
+Rezultati Monte Carlo simulacij so se zelo dobro ujemali z analitičnimi oziroma numeričnimi izračuni, 
+kar potrjuje ustreznost simulacijskega pristopa za obravnavani problem.
+
+V nadaljevanju smo uvedli degradacijo življenjske dobe.
+Glavni rezultat naloge je analitična določitev optimalnega števila popravil $k^* = 7$, ki minimiziri dolgoročne stroške na časovno enoto, 
+in primerjava njega z rezultatom ki smo ga dobili s simulacijami. Pomembno je poudariti, da je optimalna vrednost $k^*$ neodvisna od izbire 
+porazdelitve časov med okvarami in je določena samo s stroškovnimi parametri in stopnjo degradacije. Izbira porazdelitve 
+vpliva zgolj na trajanje posameznih ciklov, ne pa na optimalno število popravil do nakupa novega stroja.
+Rezultati Monte Carlo simulacij so v vseh treh modelih potrdili analitično dobljeno optimalno rešitev, 
+kar dodatno potrjuje pravilnost analitičnega rezultata in uporabnost simulacijskih metod.
+
+\end{document}
