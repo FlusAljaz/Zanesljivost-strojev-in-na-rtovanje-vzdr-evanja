@@ -442,7 +442,7 @@ slider_Cd.set(250)
 slider_d = make_slider("Degradacija d", 0.50, 0.95, vrstica=5, vmesni_korak= 0.01)
 slider_d.set(0.8)
 
-slider_i0 = make_slider("Začetno stanje rabljenega stroja i₀", 0, 15, vrstica=6, vmesni_korak=0.5)
+slider_i0 = make_slider("Začetno stanje rabljenega stroja i₀", 0, 15, vrstica=6, vmesni_korak=1)
 slider_i0.set(0)
 
 slider_beta = make_slider("Weibull β", 0.1, 5.0, vrstica=14, vmesni_korak= 0.1)
