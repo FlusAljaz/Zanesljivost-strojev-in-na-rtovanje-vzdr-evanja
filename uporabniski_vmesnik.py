@@ -427,16 +427,16 @@ def make_slider(besedilo, zacetek, konec, vrstica, vmesni_korak):
 
 ##############naredimo vse sliderje
 
-slider_mu = make_slider("Pričakovana življenjska doba stroja", 1, 40, vrstica=1, vmesni_korak=0.25)
+slider_mu = make_slider("Pričakovana življenjska doba stroja", 1, 20, vrstica=1, vmesni_korak=0.25)
 slider_mu.set(4)
 
-slider_Cn = make_slider("Strošek novega stroja Cn", 2000, 15000, vrstica=2, vmesni_korak=1)
+slider_Cn = make_slider("Strošek novega stroja Cn", 200, 10000, vrstica=2, vmesni_korak=100)
 slider_Cn.set(8000)
 
-slider_Cp = make_slider("Strošek popravila Cp", 100, 2000, vrstica=3, vmesni_korak=1)
+slider_Cp = make_slider("Strošek popravila Cp", 50, 1000, vrstica=3, vmesni_korak=25)
 slider_Cp.set(600)
 
-slider_Cd = make_slider("Izguba dohodka Cd", 0, 2000, vrstica=4, vmesni_korak= 1)
+slider_Cd = make_slider("Izguba dohodka Cd", 0, 1000, vrstica=4, vmesni_korak= 10)
 slider_Cd.set(250)
 
 slider_d = make_slider("Degradacija d", 0.50, 0.95, vrstica=5, vmesni_korak= 0.01)
