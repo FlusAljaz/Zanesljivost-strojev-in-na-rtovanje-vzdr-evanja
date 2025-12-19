@@ -269,7 +269,7 @@ def animacija_funkcije_stroskov(stroski_zamenjave, stroski_samo_popravilio, stro
     ani = animation.FuncAnimation( #ustvarimo animacijo
         fig,
         update,
-        st_korakov=len(d_vrednosti),
+        frames=len(d_vrednosti),
         interval=120, #cas med sličicami
         blit=False #to pomeni da matplotlib nariše samo ti kar se spremeni
     )
