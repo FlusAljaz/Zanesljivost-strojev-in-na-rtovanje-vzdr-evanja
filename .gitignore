@@ -16,3 +16,8 @@ __pycache__/
 
 # PDFs (build output)
 *.pdf
+
+.venv/
+__pycache__/
+*.pyc
+
