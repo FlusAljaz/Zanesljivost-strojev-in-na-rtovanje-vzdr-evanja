@@ -72,6 +72,15 @@ def graf_monte_carlo_primerjava(strosek_zamenjave, strosek_samo_popravilo, stros
     g_vrednosti = (strosek_zamenjave + k_s * strosek_popravilo) / (m0 * (1 - d**k_s) / (1 - d))
     optimalno_st_popravil = int(k_s[np.argmin(g_vrednosti)])
 
+    if i0 >= optimalno_st_popravil:
+        messagebox.showinfo(
+            "Monte Carlo validacija",
+            "Optimalno število popravil je že doseženo.\n\n"
+            "Optimalna odločitev je zamenjava stroja,\n"
+            "zato Monte Carlo validacija ni smiselna."
+        )
+        return
+
     izbire = {
         f"Optimalna (k={optimalno_st_popravil})": optimalno_st_popravil,
         "k = 2": 2,
@@ -277,7 +286,59 @@ def animacija_funkcije_stroskov(stroski_zamenjave, stroski_samo_popravilio, stro
     plt.show()
 
 
-# CALLBACK: ODLOČITEV + GRAF
+def obcutljivostna_analiza_d():
+    try:
+        # preberi trenutne vrednosti iz UI
+        Cn = slider_Cn.get()
+        Cp = slider_Cp.get()
+        Cd = slider_Cd.get()
+        m0 = slider_mu.get()
+        i0 = int(slider_i0.get())
+
+        C = Cp + Cd
+
+        # sweep parametra d
+        d_vrednosti = np.linspace(0.55, 0.95, 81)
+
+        k_s = []
+        koliko_popravil_se_splaca = []
+        popravilo_zamenjava = []  # 1 = popravi, 0 = zamenjaj
+
+        for d in d_vrednosti:
+            k_star, g_vals, _ = optimalno_st_popravil(Cn, C, m0, d)
+            preostalo_st_popravil = max(k_star - i0, 0)
+
+            k_s.append(k_star)
+            koliko_popravil_se_splaca.append(preostalo_st_popravil)
+            popravilo_zamenjava.append(1 if preostalo_st_popravil > 0 else 0)
+
+        # ---- Grafi ----
+        plt.figure(figsize=(8,4)) #ce imamo nov stroj
+        plt.plot(d_vrednosti, k_s, marker="o", markersize=3)
+        plt.xlabel("Degradacija d")
+        plt.ylabel("Optimalno število popravil k* (za nov stroj)")
+        plt.title("Občutljivostna analiza: vpliv degradacije na k*")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+
+        # ce imamo rabljen stroj
+        if i0 > 0:
+            plt.figure(figsize=(8,4))
+            plt.plot(d_vrednosti, koliko_popravil_se_splaca, marker="o", markersize=3)
+            plt.xlabel("Degradacija d")
+            plt.ylabel("Smiselna popravila (max(k* - i0, 0))")
+            plt.title(f"Občutljivostna analiza (rabljen stroj): i₀ = {i0}")
+            plt.grid(True)
+            plt.tight_layout()
+            plt.show()
+
+    except Exception as e:
+        messagebox.showerror("Napaka", str(e))
+
+
+
+#ODLOČITEV + GRAF
 
 def izracun_optimalne_izbire():
     try:
@@ -497,6 +558,13 @@ ctk.CTkButton(
         i0=int(slider_i0.get())
     )
 ).grid(row=11, column=0, columnspan=2, pady=6)
+
+ctk.CTkButton(
+    root,
+    text="Občutljivost: k* glede na d",
+    command=obcutljivostna_analiza_d
+).grid(row=12, column=0, columnspan=2, pady=6)
+
 
 
 ctk.CTkButton(
