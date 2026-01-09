@@ -72,15 +72,6 @@ def graf_monte_carlo_primerjava(strosek_zamenjave, strosek_samo_popravilo, stros
     g_vrednosti = (strosek_zamenjave + k_s * strosek_popravilo) / (m0 * (1 - d**k_s) / (1 - d))
     optimalno_st_popravil = int(k_s[np.argmin(g_vrednosti)])
 
-    if i0 >= optimalno_st_popravil:
-        messagebox.showinfo(
-            "Monte Carlo validacija",
-            "Optimalno število popravil je že doseženo.\n\n"
-            "Optimalna odločitev je zamenjava stroja,\n"
-            "zato Monte Carlo validacija ni smiselna."
-        )
-        return
-
     izbire = {
         f"Optimalna (k={optimalno_st_popravil})": optimalno_st_popravil,
         "k = 2": 2,
@@ -92,14 +83,14 @@ def graf_monte_carlo_primerjava(strosek_zamenjave, strosek_samo_popravilo, stros
     oznake = []
 
     for oznaka, st_popavil in izbire.items():
-        strosek = monte_carlo_strosek(st_popavil, strosek_zamenjave, strosek_popravilo, m0, d, N=5000, i0=i0)
+        strosek = monte_carlo_strosek(st_popavil, strosek_zamenjave, strosek_popravilo, m0, d, N=5000, i0=0)
         podatki.append(strosek)
         oznake.append(oznaka)
 
     plt.figure(figsize=(7,4))
     plt.boxplot(podatki, labels=oznake, showfliers=False)
     plt.ylabel("Strošek na časovno enoto")
-    plt.title("Monte Carlo primerjava izbir števila zamenjav")
+    plt.title("Monte Carlo primerjava izbir števila zamenjav za nov stroj")
     plt.grid(True, axis="y")
     plt.tight_layout()
     plt.show()
@@ -244,43 +235,50 @@ def graf_povprecne_zivljenjske_poti():
 
 
 def animacija_funkcije_stroskov(stroski_zamenjave, stroski_samo_popravilio, stroski_izpad, m0):
+
     stroski_popravilo = stroski_samo_popravilio + stroski_izpad
-
     k_s = np.arange(1, 31)
-
     d_vrednosti = np.linspace(0.5, 0.95, 45)
 
     fig, ax = plt.subplots(figsize=(7,5))
 
-    line, = ax.plot([], [], marker="o", lw=2) #prazen graf za g
-    vline = ax.axvline(0, linestyle=":", color="gray") #navpična črta ki nam pokaze optimalni k
-    text = ax.text(0.02, 0.95, "", transform=ax.transAxes) #besedilo na grafu
+    line, = ax.plot([], [], marker="o", lw=2)
+    vline = ax.axvline(0, linestyle=":", color="gray")
+    text = ax.text(0.02, 0.95, "", transform=ax.transAxes)
 
-    ax.set_xlim(1, k_s[-1]) 
-    ax.set_ylim(0, None) 
+    ax.set_xlim(1, k_s[-1])
     ax.set_xlabel("Število popravil k")
     ax.set_ylabel("Strošek na časovno enoto g(k)")
     ax.set_title("Animacija grafa stroškov na časovno enoto glede na degradacijo d")
     ax.grid(True)
 
-    def update(frame):
-        d = d_vrednosti[frame] #vrednost degradacije za vsak frame
-        g_vrednosti = (stroski_zamenjave + k_s * stroski_popravilo) / (m0 * (1 - d**k_s) / (1 - d))
-        optimalno_st_popravil = k_s[np.argmin(g_vrednosti)]
-
-        line.set_data(k_s, g_vrednosti) #narišemo novo krivuljo za trenutno vrednost d
-        vline.set_xdata(optimalno_st_popravil) #premaknemo navpišno črto k nam pokaže kako se premika k*
-        text.set_text(f"d = {d:.2f}   |   k* = {optimalno_st_popravil}") #na grafu napišemo nov d in k*
-
-        ax.set_ylim(0, max(g_vrednosti)*1.1) #prilagodimo ylin
+    def init():
+        # nariši prvi frame, da ni prazno
+        d0 = d_vrednosti[0]
+        g0 = (stroski_zamenjave + k_s * stroski_popravilo) / (m0 * (1 - d0**k_s) / (1 - d0))
+        line.set_data(k_s, g0)
+        vline.set_xdata(k_s[np.argmin(g0)])
+        text.set_text(f"d = {d0:.2f}   |   k* = {int(k_s[np.argmin(g0)])}")
+        ax.set_ylim(0, float(np.max(g0))*1.1)
         return line, vline, text
 
-    ani = animation.FuncAnimation( #ustvarimo animacijo
+    def update(frame):
+        d = d_vrednosti[frame]
+        g_vrednosti = (stroski_zamenjave + k_s * stroski_popravilo) / (m0 * (1 - d**k_s) / (1 - d))
+        k_star = int(k_s[np.argmin(g_vrednosti)])
+        line.set_data(k_s, g_vrednosti)
+        vline.set_xdata(k_star)
+        text.set_text(f"d = {d:.2f}   |   k* = {k_star}")
+        ax.set_ylim(0, float(np.max(g_vrednosti))*1.1)
+        return line, vline, text
+
+    ani = animation.FuncAnimation(
         fig,
         update,
         frames=len(d_vrednosti),
-        interval=120, #cas med sličicami
-        blit=False #to pomeni da matplotlib nariše samo ti kar se spremeni
+        init_func=init,
+        interval=120,
+        blit=False
     )
 
     plt.show()
@@ -354,15 +352,15 @@ def izracun_optimalne_izbire():
         k_star, g_vals, _ = optimalno_st_popravil(Cn, C, m0, d)
         rZ = float(np.min(g_vals))
 
-        remaining_repairs = max(k_star - i0, 0)
+        preostale_zamenjave = max(k_star - i0, 0)
 
         # ODLOČITEV
         result_label.configure(
             text=
             "Optimalna izbira:\n\n"
             f"• Optimalno število popravil za nov stroj: k* = {k_star}\n"
-            f"• Smiselno število popravil za naš stroj: {remaining_repairs}\n\n"
-            f"→ {'ZAMENJAJ' if remaining_repairs == 0 else 'POPRAVI'}"
+            f"• Smiselno število popravil za naš stroj: {preostale_zamenjave}\n\n"
+            f"→ {'ZAMENJAJ' if preostale_zamenjave == 0 else 'POPRAVI'}"
         )
 
         # GRAF
@@ -536,16 +534,16 @@ ctk.CTkButton(
 ).grid(row=9, column=0, columnspan=2, pady=6)
 
 
-ctk.CTkButton(
-    root,
-    text="Izriši funkcijo stroška na časovno enoto",
-    command=lambda: narisi_g(
-        slider_Cn.get(),
-        slider_Cp.get() + slider_Cd.get(),
-        slider_mu.get(),
-        slider_d.get()
-    )
-).grid(row=10, column=0, columnspan=2, pady=6)
+#ctk.CTkButton(
+#    root,
+#    text="Izriši funkcijo stroška na časovno enoto",
+#    command=lambda: narisi_g(
+#        slider_Cn.get(),
+#        slider_Cp.get() + slider_Cd.get(),
+#        slider_mu.get(),
+#        slider_d.get()
+#    )
+#).grid(row=10, column=0, columnspan=2, pady=6)
 
 ctk.CTkButton(
     root,
